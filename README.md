@@ -21,4 +21,4 @@
 ## Структурные части проекта
 Движок [Unity](https://unity.com/ru) и язык программирования C#
 ## Сторонние материалы / ассеты
-Ссылки на все сторонние материалы предоставленны в credits.md.
+Ссылки на все сторонние материалы предоставленны в [credits.md](https://github.com/gorobtsov2006/Hamster-criminal/blob/main/credits.md).

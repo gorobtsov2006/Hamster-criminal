@@ -4,11 +4,16 @@ using UnityEngine;
 
 public class GridMaker : MonoBehaviour
 {
-    public int rows , cols ;
+    int rows , cols ;
     public GameObject cellHolder;
+    public LevelCreator currentLevel;
     List<List<GameObject>> cells = new List<List<GameObject>>();
+    public List<SpriteLibrary> spriteLibrary = new List<SpriteLibrary>();
+
     private void Start()
     {
+        rows = currentLevel.level.Count / 2;
+        cols = currentLevel.level.Count / 2;
         CreateGrid();
     }
 
@@ -19,9 +24,16 @@ public class GridMaker : MonoBehaviour
             cells.Add(new List<GameObject>());
             for(int c = 0; c < cols; c++)
             {
-                GameObject gameObject = Instantiate(cellHolder, new Vector3(c, r), Quaternion.identity);
-                cells[r].Add(gameObject);
+                GameObject g = Instantiate(cellHolder, new Vector3(c, r, 0), Quaternion.identity);
+                cells[r].Add(g);
+              // spriteLibrary.Find(x->x.element == currentLevel.level[r][c]); нужно исправить ошибку
             }
         }
     }
+}
+
+public class SpriteLibrary
+{
+    public ElementTypes element;
+    public Sprite sprite;
 }

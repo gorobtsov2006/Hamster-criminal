@@ -5,7 +5,7 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     public int initialRow, initialCol;
-    public float moveDelay = 0.2f;
+    public float moveDelay = 0.1f;
 
     private Stack<Vector3> positionHistory = new Stack<Vector3>();
     private bool isMoving = false;
@@ -13,7 +13,7 @@ public class Player : MonoBehaviour
 
     private void Start()
     {
-        transform.position = new Vector3(initialCol, initialRow, 0);
+        transform.position = new Vector3(initialCol, initialRow);
         positionHistory.Push(transform.position);
     }
 
@@ -21,19 +21,19 @@ public class Player : MonoBehaviour
     {
         if (!isMoving && !isReturning)
         {
-            if (Input.GetKeyDown(KeyCode.RightArrow))
+            if (Input.GetKey(KeyCode.RightArrow))
             {
                 StartCoroutine(Move(Vector3.right));
             }
-            else if (Input.GetKeyDown(KeyCode.LeftArrow))
+            else if (Input.GetKey(KeyCode.LeftArrow))
             {
                 StartCoroutine(Move(Vector3.left));
             }
-            else if (Input.GetKeyDown(KeyCode.UpArrow))
+            else if (Input.GetKey(KeyCode.UpArrow))
             {
                 StartCoroutine(Move(Vector3.up));
             }
-            else if (Input.GetKeyDown(KeyCode.DownArrow))
+            else if (Input.GetKey(KeyCode.DownArrow))
             {
                 StartCoroutine(Move(Vector3.down));
             }

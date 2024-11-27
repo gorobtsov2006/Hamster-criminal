@@ -19,8 +19,8 @@ public class GridMaker : MonoBehaviour
             cells.Add(new List<GameObject>());
             for(int c = 0; c < cols; c++)
             {
-                GameObject g = Instantiate(cellHolder, new Vector3(c,r,0), Quaternion.identity);
-                cells[r].Add(g);
+                GameObject gameObject = Instantiate(cellHolder, new Vector3(c, r), Quaternion.identity);
+                cells[r].Add(gameObject);
             }
         }
     }

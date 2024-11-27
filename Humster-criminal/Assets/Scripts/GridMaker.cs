@@ -26,7 +26,7 @@ public class GridMaker : MonoBehaviour
             {
                 GameObject g = Instantiate(cellHolder, new Vector3(c, r, 0), Quaternion.identity);
                 cells[r].Add(g);
-              // spriteLibrary.Find(x->x.element == currentLevel.level[r][c]); нужно исправить ошибку
+                spriteLibrary.Find(x=>x.element == currentLevel.level[c]);
             }
         }
     }

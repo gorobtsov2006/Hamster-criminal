@@ -4,36 +4,59 @@ using UnityEngine;
 
 public class GridMaker : MonoBehaviour
 {
-    int rows , cols ;
+    int rows, cols;
     public GameObject cellHolder;
-    public LevelCreator currentLevel;
-    List<List<GameObject>> cells = new List<List<GameObject>>();
+    public LevelCreator levelHolder;
+    public List<GameObject> cells = new List<GameObject>();
     public List<SpriteLibrary> spriteLibrary = new List<SpriteLibrary>();
+    public static GridMaker instance;
+    public int Rows { get { return rows; } }
+    public int Cols { get { return cols; } }
 
+    private void Awake()
+    {
+        if (instance == null)
+            instance = this;
+        else
+            Destroy(this);
+    }
     private void Start()
     {
-        rows = currentLevel.level.Count / 2;
-        cols = currentLevel.level.Count / 2;
+        float count = levelHolder.level.Count;
+        rows = (int)Mathf.Sqrt(count);
+        cols = rows;
         CreateGrid();
     }
 
     public void CreateGrid()
     {
-        for(int r = 0; r < rows; r++)
+        for (int i = 0; i < levelHolder.level.Count; i++)
         {
-            cells.Add(new List<GameObject>());
-            for(int c = 0; c < cols; c++)
+            if (levelHolder.level[i] != ElementTypes.Empty)
             {
-                GameObject g = Instantiate(cellHolder, new Vector3(c, r, 0), Quaternion.identity);
-                cells[r].Add(g);
-                spriteLibrary.Find(x=>x.element == currentLevel.level[c]);
+                GameObject g = Instantiate(cellHolder, new Vector3(i % cols, i / rows, 0), Quaternion.identity);
+
+                ElementTypes currentElement = levelHolder.level[i];
+                Sprite s = spriteLibrary.Find(x => x.element == currentElement).sprite;
+
+                g.GetComponent<SpriteRenderer>().sprite = s;
+                //g.GetComponent<CellProperty>().AssignInfo(i % cols, i / rows, currentElement);
             }
         }
     }
+
+
+    public void Rule(ElementTypes a, ElementTypes b)
+    {
+
+    }
 }
 
+
+[System.Serializable]
 public class SpriteLibrary
 {
     public ElementTypes element;
     public Sprite sprite;
-}
+ }
+

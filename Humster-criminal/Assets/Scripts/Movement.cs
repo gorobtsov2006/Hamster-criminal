@@ -11,10 +11,16 @@ public class Player : MonoBehaviour
     private bool isMoving = false;
     private bool isReturning = false;
 
+    // Ссылка на компонент Animator
+    private Animator animator;
+
     private void Start()
     {
         transform.position = new Vector3(initialCol, initialRow);
         positionHistory.Push(transform.position);
+
+        // Получаем ссылку на Animator
+        animator = GetComponent<Animator>();
     }
 
     private void Update()
@@ -37,6 +43,11 @@ public class Player : MonoBehaviour
             {
                 StartCoroutine(Move(Vector3.down));
             }
+            else
+            {
+                // Останавливаем анимацию движения
+                animator.SetBool("IsMoving", false);
+            }
         }
 
         if (Input.GetKey(KeyCode.Z))
@@ -51,6 +62,11 @@ public class Player : MonoBehaviour
     private IEnumerator Move(Vector3 direction)
     {
         isMoving = true;
+
+        // Устанавливаем направление анимации
+        animator.SetFloat("MoveX", direction.x);
+        animator.SetFloat("MoveY", direction.y);
+        animator.SetBool("IsMoving", true);
 
         while (Input.GetKey(KeyCode.RightArrow) && direction == Vector3.right ||
                Input.GetKey(KeyCode.LeftArrow) && direction == Vector3.left ||
@@ -74,6 +90,8 @@ public class Player : MonoBehaviour
                     else
                     {
                         isMoving = false;
+                        //Остановка анимации
+                        animator.SetBool("IsMoving", false);
                         yield break;
                     }
                 }
@@ -85,6 +103,8 @@ public class Player : MonoBehaviour
             else
             {
                 isMoving = false;
+                //Остановка анимации
+                animator.SetBool("IsMoving", false);
                 yield break;
             }
         }

@@ -45,11 +45,17 @@ public class PauseMenu : MonoBehaviour
         PauseGame = true;
     }
 
-    //Выйти в главное меню
+    //Выход в главное меню
     public void LoadMenu()
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene("Menu");
+    }
+
+    //Перезапуск
+    public void Restart()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
 }

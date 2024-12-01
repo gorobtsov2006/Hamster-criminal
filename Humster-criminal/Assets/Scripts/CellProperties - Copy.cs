@@ -1,10 +1,11 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CellProperty : MonoBehaviour
 {
     ElementTypes element;
-    bool isPushnable;
-    bool destroyPlayer;
+    bool isPushable;
+    bool destroysObject;
     bool isWin;
     bool isPlayer;
     bool isStop;
@@ -15,12 +16,17 @@ public class CellProperty : MonoBehaviour
 
     public bool IsStop { get { return isStop; } }
 
+    public bool IsPushable { get { return isPushable; } }
+
+    public int CurrentRow {get { return currentRow; } }
+    
+    public int CurrentCol {get { return currentCol; } }
+
     SpriteRenderer spriteRenderer;
 
-    private void Start()
+    private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-
     }
 
     public void AssignInfo(int r, int c, ElementTypes e)
@@ -28,6 +34,7 @@ public class CellProperty : MonoBehaviour
         currentRow = r;
         currentCol = c;
         element = e;
+        ChangeSprite();
 
         if (e == ElementTypes.Wall)
         {
@@ -37,35 +44,86 @@ public class CellProperty : MonoBehaviour
         if (e == ElementTypes.Hamster)
         {
             isPlayer = true;
+            spriteRenderer.sortingOrder = 100;
         }
+    }
+
+    public void Initialize()
+    {
+        isPushable = false;
+        destroysObject = false;
+        isWin = false;
+        isPlayer = false;
+        isStop = false;
+
+        if ((int)element >= 99)
+        {
+            isPushable = true;
+        }
+    }
+
+    public void ChangeSprite()
+    {
+        Sprite s = GridMaker.instance.spriteLibrary.Find(x => x.element == element).sprite;
+
+        spriteRenderer.sprite = s;
+
+        if (isPlayer || isPushable)
+        {
+            spriteRenderer.sortingOrder = 100;
+        }
+        else
+        {
+            spriteRenderer.sortingOrder = 10;
+        }
+    }
+
+    public void ChangeObject(CellProperty c)
+    {
+        element = c.element;
+        isPushable = c.isPushable;
+        destroysObject = c.destroysObject;
+        isWin = c.isWin;
+        isPlayer = c.isPlayer;
+        isStop = c.IsStop;
+        ChangeSprite();
+    }
+
+    public void IsPlayer(bool isP)
+    {
+        isPlayer = isP;
+    }
+
+    public void IsItStop(bool isS)
+    {
+        isStop = isS;
+    }
+
+    public void IsItWin(bool isW)
+    {
+        isWin = isW;
+    }
+    public void IsItPushable(bool isPush)
+    {
+        isPushable = isPush;
+    }
+    public void IsItDestroy(bool isD)
+    {
+        destroysObject = isD;
     }
 
     private void Update()
     {
-        /*if (isPlayer)
-        {
-            if (Input.GetKeyDown(KeyCode.RightArrow) && currentCol + 1 < GridMaker.instance.Cols && !GridMaker.instance.cells[currentRow][currentCol + 1].GetComponent<CellProperty>().isStop)
-            {
-                transform.position = new Vector3(transform.position.x + 1, transform.position.y, transform.position.z);
-                currentCol++;
-            }
-            else if (Input.GetKeyDown(KeyCode.LeftArrow) && currentCol - 1 >= 0 && !GridMaker.instance.Cols && !GridMaker.instance.cells[currentRow][currentCol - 1].GetComponent<CellProperty>().isStop)
-            {
-                transform.position = new Vector3(transform.position.x - 1, transform.position.y, transform.position.z);
-                currentCol--;
-            }
-            else if (Input.GetKeyDown(KeyCode.UpArrow)&& currentRow +1 < GridMaker.instance.Rows && !GridMaker.instance.cells[currentRow + 1][currentRow].GetComponent<CellProperty>().isStop)
-            {
-                transform.position = new Vector3(transform.position.x, transform.position.y + 1, transform.position.z);
-                currentRow++;
-            }
-            else if (Input.GetKeyDown(KeyCode.DownArrow) && currentRow - 1 >= 0 && !GridMaker.instance.cells[currentRow - 1][currentCol].GetComponent<CellProperty>().isStop)
-            {
-                transform.position = new Vector3(transform.position.x, transform.position.y - 1, transform.position.z);
-                currentRow--;
-            }
+        
+    }
 
-        }*/
+    public void CheckWin()
+    {
+        
+    }
 
+    public void CheckDestroy()
+    {
+        
     }
 }

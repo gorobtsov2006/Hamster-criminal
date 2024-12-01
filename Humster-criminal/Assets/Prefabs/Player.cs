@@ -10,16 +10,17 @@ public class Player : MonoBehaviour
     private Stack<Vector3> positionHistory = new Stack<Vector3>();
     private bool isMoving = false;
     private bool isReturning = false;
+    private ElementTypes element;
 
     private void Start()
     {
-        transform.position = new Vector3(initialCol, initialRow, 0);
+        //transform.position = new Vector3(initialCol, initialRow, 0);
         positionHistory.Push(transform.position);
     }
 
     private void Update()
     {
-        if (!isMoving && !isReturning)
+        if (!isMoving && !isReturning && element == ElementTypes.Hamster)
         {
             if (Input.GetKey(KeyCode.RightArrow))
             {

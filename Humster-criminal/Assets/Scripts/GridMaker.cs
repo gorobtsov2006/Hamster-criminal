@@ -221,13 +221,6 @@ public class GridMaker : MonoBehaviour
                     p.IsItStop(true);
                 }
             }
-            else if (b == ElementTypes.SinkWord)
-            {
-                foreach (CellProperty p in GetAllCellsOf(GetActualObjectFromWord(a)))
-                {
-                    p.IsItDestroy(true);
-                }
-            }
         }
     }
     public void ResetData()

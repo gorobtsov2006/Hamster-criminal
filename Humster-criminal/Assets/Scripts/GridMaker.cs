@@ -90,6 +90,44 @@ public class GridMaker : MonoBehaviour
 
     public bool IsStop(int r, int c, Vector2 dir)
     {
+        bool isPush = false;
+        int curRow = r, curCol = c;
+        List<GameObject> atRC = FindObjectsAt(curRow, curCol);
+        if (r >= rows || c >= cols || r < 0 || c < 0)
+            return true;
+        foreach (GameObject g in atRC)
+        {
+            CellProperty currentCell = g.GetComponent<CellProperty>();
+
+            if (currentCell.IsStop)
+            {
+                return true;
+            }
+            else if (currentCell.IsPushable)
+            {
+                isPush = true;
+            }
+        }
+
+        if (!isPush)
+            return false;
+
+        if (dir == Vector2.right)
+        {
+            return IsStop(curRow, curCol + 1, Vector2.right);
+        }
+        else if (dir == Vector2.left)
+        {
+            return IsStop(curRow, curCol - 1, Vector2.left);
+        }
+        else if (dir == Vector2.up)
+        {
+            return IsStop(curRow + 1, curCol, Vector2.up);
+        }
+        else if (dir == Vector2.down)
+        {
+            return IsStop(curRow - 1, curCol, Vector2.down);
+        }
         return true;
     }
 
@@ -97,7 +135,33 @@ public class GridMaker : MonoBehaviour
 
     public void CompileRules()
     {
+        ResetData();
+        for (int i = 0; i < cells.Count; i++)
+        {
+            if (cells[i] != null)
+            {
+                CellProperty currentcell = cells[i].GetComponent<CellProperty>();
 
+                if (IsElementStartingWord(currentcell.Element))
+                {
+                    if (DoesListContainElement(FindObjectsAt(currentcell.CurrentRow - 1, currentcell.CurrentCol), ElementTypes.IsWord))
+                    {
+                        if (DoesListContainWord(FindObjectsAt(currentcell.CurrentRow - 2, currentcell.CurrentCol)))
+                        {
+                            Rule(currentcell.Element, ReturnWordAt(currentcell.CurrentRow - 2, currentcell.CurrentCol));
+                        }
+                    }
+                    if (DoesListContainElement(FindObjectsAt(currentcell.CurrentRow, currentcell.CurrentCol + 1), ElementTypes.IsWord))
+                    {
+                        if (DoesListContainWord(FindObjectsAt(currentcell.CurrentRow, currentcell.CurrentCol + 2)))
+                        {
+                            Rule(currentcell.Element, ReturnWordAt(currentcell.CurrentRow, currentcell.CurrentCol + 2));
+                        }
+                    }
+                }
+            }
+
+        }
     }
 
     public ElementTypes GetActualObjectFromWord(ElementTypes e)
@@ -128,7 +192,50 @@ public class GridMaker : MonoBehaviour
 
     public void Rule(ElementTypes a, ElementTypes b)
     {
+        if ((int)b >= 100 && (int)b < 150)
+        {
 
+            List<CellProperty> cellsOf = GetAllCellsOf(GetActualObjectFromWord(a));
+            for (int i = 0; i < cellsOf.Count; i++)
+            {
+                cellsOf[i].ChangeObject(GetCellOf(GetActualObjectFromWord(b)));
+            }
+        }
+        else if ((int)b >= 150)
+        {
+            
+            if (b == ElementTypes.YouWord)
+            {
+                foreach (CellProperty p in GetAllCellsOf(GetActualObjectFromWord(a)))
+                {
+                    p.IsPlayer(true);
+                }
+               
+            }           
+            else if (b == ElementTypes.WinWord)
+            {
+                
+                foreach (CellProperty p in GetAllCellsOf(GetActualObjectFromWord(a)))
+                {
+                    p.IsItWin(true);
+                }
+            }
+            else if (b == ElementTypes.StopWord)
+            {
+                //stop property true
+                foreach (CellProperty p in GetAllCellsOf(GetActualObjectFromWord(a)))
+                {
+                    p.IsItStop(true);
+                }
+            }
+            else if (b == ElementTypes.SinkWord)
+            {
+                foreach (CellProperty p in GetAllCellsOf(GetActualObjectFromWord(a)))
+                {
+                    p.IsItDestroy(true);
+                }
+            }
+        }
     }
     public void ResetData()
     {

@@ -9,19 +9,21 @@ public enum ElementTypes
     Wall, 
     Box, 
     Goal,
+    Goop,
 
     IsWord = 99,
     HamsterWord = 100,
     WallWord,
     GoalWord,
-    RockWord,
-
+    BoxWord,
+    GoopWord,
 
 
     YouWord = 200,
     PushWord,
     WinWord,
     StopWord,
+    SinkWord,
 }
 
 

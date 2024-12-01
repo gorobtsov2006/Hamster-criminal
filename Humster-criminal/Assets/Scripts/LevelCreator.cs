@@ -4,24 +4,57 @@ using UnityEngine;
 
 public enum ElementTypes
 {
-    Empty,
+    Empty = 0,
     Hamster,
-    Wall, 
-    Rock, 
-    Flag,
+    Wall,
+    Box,
+    Goal,
+
+    IsWord = 99,
+    HamsterWord = 100,
+    WallWord,
+    GoalWord,
+    BoxWord,
+
+    YouWord = 200,
+    PushWord,
+    WinWord,
+    StopWord,
 }
 
-
-
-[CreateAssetMenu()][System.Serializable]
+[CreateAssetMenu(menuName = "Level Creator")]
+[System.Serializable]
 public class LevelCreator : ScriptableObject
 {
+    [SerializeField]
+    public int gridWidth = 5;
+
+    [SerializeField]
+    public int gridHeight = 5;
 
     [SerializeField]
     public List<ElementTypes> level = new List<ElementTypes>();
 
-    public LevelCreator()
+    public void GenerateLevel()
     {
-        level = new List<ElementTypes>();
+        int newSize = gridWidth * gridHeight;
+        if (level.Count != newSize)
+        {
+            level.Clear();
+            for (int i = 0; i < newSize; i++)
+            {
+                level.Add(ElementTypes.Empty);
+            }
+        }
+    }
+
+    private void OnValidate()
+    {
+
+        int newSize = gridWidth * gridHeight;
+        if (level.Count != newSize)
+        {
+            GenerateLevel();
+        }
     }
 }

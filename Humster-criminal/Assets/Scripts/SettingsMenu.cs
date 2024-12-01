@@ -8,9 +8,14 @@ public class SettingsMenu : MonoBehaviour
 {
     public TMP_Dropdown resolutionDropdown;
     public TMP_Dropdown qualityDropdown;
-
+    
     Resolution[] resolutions;
 
+    //Toggle
+    public Toggle toggle;
+    public Sprite spriteOn;
+    public Sprite spriteOff;
+    private Image toggleImage;
     // Start is called before the first frame update
     void Start()
     {
@@ -31,7 +36,13 @@ public class SettingsMenu : MonoBehaviour
         resolutionDropdown.AddOptions(options);
         resolutionDropdown.RefreshShownValue();
         LoadSettings(curResolutionIndex);
+
+        //Toggle
+        toggleImage = toggle.targetGraphic as Image;
+        UpdateToggleAppearance(toggle.isOn);
+        toggle.onValueChanged.AddListener(UpdateToggleAppearance);
     }
+
 
 
     public void SetFullscreen(bool isFullscreen)
@@ -86,6 +97,14 @@ public class SettingsMenu : MonoBehaviour
         else
         {
             Screen.fullScreen = true;
+        }
+    }
+    //Toggle
+    void UpdateToggleAppearance(bool isOn)
+    {
+        if (toggleImage != null)
+        {
+            toggleImage.sprite = isOn ? spriteOn : spriteOff;
         }
     }
 }

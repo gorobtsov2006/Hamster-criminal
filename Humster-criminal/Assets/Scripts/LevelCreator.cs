@@ -4,26 +4,26 @@ using UnityEngine;
 
 public enum ElementTypes
 {
-    Empty,
+    Empty=0,
     Hamster,
     Wall, 
     Box, 
     Goal,
-    Goop,
+    
 
     IsWord = 99,
     HamsterWord = 100,
     WallWord,
     GoalWord,
     BoxWord,
-    GoopWord,
+   
 
 
     YouWord = 200,
     PushWord,
     WinWord,
     StopWord,
-    SinkWord,
+    
 }
 
 

@@ -57,8 +57,8 @@ public class LevelCreatorInspector : Editor
             GUILayout.BeginHorizontal();
             for (int c = 0; c < cols; c++)
             {
-                int index = c + (cols * r); // Рассчитываем индекс элемента в списке
-                if (index >= 0 && index < levelCreator.level.Count) // Проверка, что индекс не выходит за пределы
+                int index = c + (cols * r);
+                if (index >= 0 && index < levelCreator.level.Count) // Проверяем, что индекс в пределах списка
                 {
                     if (GUILayout.Button(textureHolder[levelCreator.level[index]], GUILayout.Width(50), GUILayout.Height(50)))
                     {

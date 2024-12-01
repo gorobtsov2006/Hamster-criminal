@@ -27,10 +27,10 @@ public enum ElementTypes
 public class LevelCreator : ScriptableObject
 {
     [SerializeField]
-    public int gridWidth = 5; 
+    public int gridWidth = 5;
 
     [SerializeField]
-    public int gridHeight = 5; 
+    public int gridHeight = 5;
 
     [SerializeField]
     public List<ElementTypes> level = new List<ElementTypes>();
@@ -40,10 +40,10 @@ public class LevelCreator : ScriptableObject
         int newSize = gridWidth * gridHeight;
         if (level.Count != newSize)
         {
-            level.Clear(); 
+            level.Clear();
             for (int i = 0; i < newSize; i++)
             {
-                level.Add(ElementTypes.Empty); 
+                level.Add(ElementTypes.Empty);
             }
         }
     }

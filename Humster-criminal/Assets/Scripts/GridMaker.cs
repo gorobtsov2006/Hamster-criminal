@@ -13,9 +13,15 @@ public class GridMaker : MonoBehaviour
     public static GridMaker instance = null;
     public GameObject boundary;
     int currentLevel = 0;
-    public int Rows { get { return rows; } }
-    public int Cols { get { return cols; } }
+    public int Rows
+    {
+        get { return rows; }
+    }
 
+    public int Cols
+    {
+        get { return cols; }
+    }
     private void Awake()
     {
         if (instance == null)
@@ -23,6 +29,7 @@ public class GridMaker : MonoBehaviour
         else
             Destroy(this);
     }
+
     private void Start()
     {
         if (!PlayerPrefs.HasKey("Level"))
@@ -34,10 +41,10 @@ public class GridMaker : MonoBehaviour
         float count = levelHolder[currentLevel].level.Count;
         rows = (int)Mathf.Sqrt(count);
         cols = rows;
+
         CreateGrid();
         CompileRules();
     }
-
 
     private void Update()
     {
@@ -46,6 +53,7 @@ public class GridMaker : MonoBehaviour
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
     }
+
     public void CreateGrid()
     {
         for (int gI = -1; gI <= rows; gI += 1)
@@ -68,9 +76,13 @@ public class GridMaker : MonoBehaviour
                 ElementTypes currentElement = levelHolder[currentLevel].level[i];
 
                 g.GetComponent<CellProperty>().AssignInfo(counter / rows, counter % cols, currentElement);
+                //Debug.Log( currentElement.ToString() + "R : " + i / rows + " C : " + i % cols);
+
+
             }
             counter++;
         }
+
     }
 
     public Sprite ReturnSpriteOf(ElementTypes e)
@@ -82,7 +94,6 @@ public class GridMaker : MonoBehaviour
     {
         return new Vector2(i % cols, i / rows);
     }
-
 
 
     public bool IsStop(int r, int c, Vector2 dir)
@@ -128,8 +139,6 @@ public class GridMaker : MonoBehaviour
         return true;
     }
 
-
-
     public void CompileRules()
     {
         ResetData();
@@ -141,6 +150,14 @@ public class GridMaker : MonoBehaviour
 
                 if (IsElementStartingWord(currentcell.Element))
                 {
+
+                    /*if (DoesListContainElement(FindObjectsAt(currentcell.CurrentRow + 1, currentcell.CurrentCol), ElementTypes.IsWord))
+                    {
+                        if (DoesListContainWord(FindObjectsAt(currentcell.CurrentRow +2, currentcell.CurrentCol)))
+                        {
+                            Rule(currentcell.Element, ReturnWordAt(currentcell.CurrentRow + 2, currentcell.CurrentCol));
+                        }
+                    }*/
                     if (DoesListContainElement(FindObjectsAt(currentcell.CurrentRow - 1, currentcell.CurrentCol), ElementTypes.IsWord))
                     {
                         if (DoesListContainWord(FindObjectsAt(currentcell.CurrentRow - 2, currentcell.CurrentCol)))
@@ -155,11 +172,20 @@ public class GridMaker : MonoBehaviour
                             Rule(currentcell.Element, ReturnWordAt(currentcell.CurrentRow, currentcell.CurrentCol + 2));
                         }
                     }
+
+                    /*if (DoesListContainElement(FindObjectsAt(currentcell.CurrentRow, currentcell.CurrentCol -1), ElementTypes.IsWord))
+                    {
+                        if (DoesListContainWord(FindObjectsAt(currentcell.CurrentRow, currentcell.CurrentCol - 2)))
+                        {
+                            Rule(currentcell.Element, ReturnWordAt(currentcell.CurrentRow, currentcell.CurrentCol - 2));
+                        }
+                    }*/
                 }
             }
 
         }
     }
+
 
     public ElementTypes GetActualObjectFromWord(ElementTypes e)
     {
@@ -183,11 +209,12 @@ public class GridMaker : MonoBehaviour
 
     }
 
+
     public void Rule(ElementTypes a, ElementTypes b)
     {
         if ((int)b >= 100 && (int)b < 150)
         {
-
+            //Replace all a objects to b
             List<CellProperty> cellsOf = GetAllCellsOf(GetActualObjectFromWord(a));
             for (int i = 0; i < cellsOf.Count; i++)
             {
@@ -196,18 +223,26 @@ public class GridMaker : MonoBehaviour
         }
         else if ((int)b >= 150)
         {
-            
+            //Properties change
             if (b == ElementTypes.YouWord)
             {
                 foreach (CellProperty p in GetAllCellsOf(GetActualObjectFromWord(a)))
                 {
                     p.IsPlayer(true);
                 }
-               
-            }           
+                //player property true
+            }
+            else if (b == ElementTypes.PushWord)
+            {
+                //pushable property true
+                foreach (CellProperty p in GetAllCellsOf(GetActualObjectFromWord(a)))
+                {
+                    p.IsItPushable(true);
+                }
+            }
             else if (b == ElementTypes.WinWord)
             {
-                
+                //win property true
                 foreach (CellProperty p in GetAllCellsOf(GetActualObjectFromWord(a)))
                 {
                     p.IsItWin(true);
@@ -222,7 +257,9 @@ public class GridMaker : MonoBehaviour
                 }
             }
         }
+
     }
+
     public void ResetData()
     {
         foreach (GameObject g in cells)
@@ -231,7 +268,6 @@ public class GridMaker : MonoBehaviour
                 g.GetComponent<CellProperty>().Initialize();
         }
     }
-
 
     public CellProperty GetCellOf(ElementTypes e)
     {
@@ -290,9 +326,13 @@ public class GridMaker : MonoBehaviour
         return null;
     }
 
-    public bool IsElementStartingWord(ElementTypes e)//
+    public bool IsElementStartingWord(ElementTypes e)
     {
-        return true;
+        if ((int)e >= 100 && (int)e < 150)
+        {
+            return true;
+        }
+        return false;
     }
 
     public List<GameObject> FindObjectsAt(int r, int c)
@@ -315,17 +355,30 @@ public class GridMaker : MonoBehaviour
         }
         return ElementTypes.Empty;
     }
-    public bool DoesListContainElement(List<GameObject> l, ElementTypes e) //
+
+    public bool DoesListContainElement(List<GameObject> l, ElementTypes e)
     {
-        return true;
+        foreach (GameObject g in l)
+        {
+            if (g.GetComponent<CellProperty>().Element == e)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
-    public bool DoesListContainWord(List<GameObject> l) //
+    public bool DoesListContainWord(List<GameObject> l)
     {
-       
-        return true;
+        foreach (GameObject g in l)
+        {
+            if ((int)g.GetComponent<CellProperty>().Element >= 100)
+            {
+                return true;
+            }
+        }
+        return false;
     }
-
 
 
     public bool IsElementIsWord(ElementTypes e)
@@ -348,12 +401,11 @@ public class GridMaker : MonoBehaviour
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
     }
-
-    [System.Serializable]
-    public class SpriteLibrary
-    {
-        public ElementTypes element;
-        public Sprite sprite;
-    }
 }
+[System.Serializable]
+public class SpriteLibrary
+{
 
+    public ElementTypes element;
+    public Sprite sprite;
+}

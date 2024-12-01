@@ -1,6 +1,7 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.SceneManagement;
 public class CellProperty : MonoBehaviour
 {
     ElementTypes element;
@@ -9,20 +10,30 @@ public class CellProperty : MonoBehaviour
     bool isWin;
     bool isPlayer;
     bool isStop;
-
     int currentRow, currentCol;
-
-    public ElementTypes Element { get { return element; } }
-
-    public bool IsStop { get { return isStop; } }
-
-    public bool IsPushable { get { return isPushable; } }
-
-    public int CurrentRow {get { return currentRow; } }
-    
-    public int CurrentCol {get { return currentCol; } }
+    public ElementTypes Element
+    {
+        get { return element; }
+    }
+    public bool IsStop
+    {
+        get { return isStop; }
+    }
+    public bool IsPushable
+    {
+        get { return isPushable; }
+    }
+    public int CurrentRow
+    {
+        get { return currentRow; }
+    }
+    public int CurrentCol
+    {
+        get { return currentCol; }
+    }
 
     SpriteRenderer spriteRenderer;
+
 
     private void Awake()
     {
@@ -35,7 +46,6 @@ public class CellProperty : MonoBehaviour
         currentCol = c;
         element = e;
         ChangeSprite();
-
         if (e == ElementTypes.Wall)
         {
             isStop = true;
@@ -47,6 +57,7 @@ public class CellProperty : MonoBehaviour
             spriteRenderer.sortingOrder = 100;
         }
     }
+
 
     public void Initialize()
     {
@@ -78,6 +89,7 @@ public class CellProperty : MonoBehaviour
         }
     }
 
+
     public void ChangeObject(CellProperty c)
     {
         element = c.element;
@@ -88,6 +100,7 @@ public class CellProperty : MonoBehaviour
         isStop = c.IsStop;
         ChangeSprite();
     }
+
 
     public void IsPlayer(bool isP)
     {
@@ -112,7 +125,7 @@ public class CellProperty : MonoBehaviour
         destroysObject = isD;
     }
 
-    private void Update()
+    void Update()
     {
         CheckDestroy();
         if (isPlayer)
@@ -231,6 +244,7 @@ public class CellProperty : MonoBehaviour
             }
         }
     }
+
 
     public void CheckDestroy()
     {

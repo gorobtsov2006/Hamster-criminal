@@ -118,10 +118,6 @@ public class GridMaker : MonoBehaviour
         {
             return ElementTypes.Wall;
         }
-        else if (e == ElementTypes.GoopWord)
-        {
-            return ElementTypes.Goop;
-        }
         return ElementTypes.Empty;
 
     }

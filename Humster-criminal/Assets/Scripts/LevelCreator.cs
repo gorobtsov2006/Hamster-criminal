@@ -14,7 +14,7 @@ public enum ElementTypes
     HamsterWord = 100,
     WallWord,
     GoalWord,
-    RockWord,
+    BoxWord,
 
 
 

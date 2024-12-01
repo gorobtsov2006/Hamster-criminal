@@ -7,8 +7,21 @@ public enum ElementTypes
     Empty,
     Hamster,
     Wall, 
-    Rock, 
-    Flag,
+    Box, 
+    Goal,
+
+    IsWord = 99,
+    HamsterWord = 100,
+    WallWord,
+    GoalWord,
+    RockWord,
+
+
+
+    YouWord = 200,
+    PushWord,
+    WinWord,
+    StopWord,
 }
 
 

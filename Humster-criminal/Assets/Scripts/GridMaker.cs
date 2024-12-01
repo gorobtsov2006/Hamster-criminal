@@ -68,9 +68,6 @@ public class GridMaker : MonoBehaviour
                 ElementTypes currentElement = levelHolder[currentLevel].level[i];
 
                 g.GetComponent<CellProperty>().AssignInfo(counter / rows, counter % cols, currentElement);
-
-
-
             }
             counter++;
         }
@@ -235,7 +232,11 @@ public class GridMaker : MonoBehaviour
     }
     public void ResetData()
     {
-
+        foreach (GameObject g in cells)
+        {
+            if (g != null)
+                g.GetComponent<CellProperty>().Initialize();
+        }
     }
 
 
@@ -264,6 +265,36 @@ public class GridMaker : MonoBehaviour
         }
         return cellProp;
 
+    }
+
+    public bool IsTherePushableObjectAt(int r, int c)
+    {
+        List<GameObject> objectsAtRC = FindObjectsAt(r, c);
+
+        foreach (GameObject g in objectsAtRC)
+        {
+            if (g.GetComponent<CellProperty>().IsPushable)
+            {
+                return true;
+            }
+        }
+        return false;
+
+    }
+
+    public GameObject GetPushableObjectAt(int r, int c)
+    {
+        List<GameObject> objectsAtRC = FindObjectsAt(r, c);
+
+        foreach (GameObject g in objectsAtRC)
+        {
+            if (g.GetComponent<CellProperty>().IsPushable)
+            {
+                return g;
+            }
+        }
+
+        return null;
     }
 
     public bool IsElementStartingWord(ElementTypes e)//

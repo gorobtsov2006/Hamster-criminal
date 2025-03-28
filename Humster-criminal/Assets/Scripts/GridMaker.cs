@@ -62,7 +62,7 @@ public class GridMaker : MonoBehaviour
             {
                 if (gI == -1 || gJ == -1 || gI == rows || gJ == rows)
                     Instantiate(boundary, new Vector3(gI, gJ, 0), Quaternion.identity);
-            }
+            } 
         }
 
 

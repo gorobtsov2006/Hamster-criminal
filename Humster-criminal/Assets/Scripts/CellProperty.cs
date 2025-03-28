@@ -13,7 +13,18 @@ public class CellProperty : MonoBehaviour
     bool isStop;
     bool isDangerous;
     int currentRow, currentCol;
-    Vector2 lastDirection = Vector2.right; // По умолчанию смотрит вправо
+    Vector2 lastDirection = Vector2.right;
+
+    // Для движения при зажатии клавиши
+    private float moveDelay = 0.2f; // Задержка между шагами (в секундах)
+    private float lastMoveTime; // Время последнего шага
+
+    // Для отмены действия
+    private struct MoveState
+    {
+        public List<(GameObject obj, int row, int col)> positions; // Позиции всех объектов перед движением
+    }
+    private Stack<MoveState> moveHistory = new Stack<MoveState>(); // История движений
 
     public ElementTypes Element
     {
@@ -134,93 +145,147 @@ public class CellProperty : MonoBehaviour
         {
             CheckDanger();
 
+            // Движение при зажатии клавиши
+            if (Time.time - lastMoveTime >= moveDelay)
+            {
+                // Сохраняем текущее состояние перед движением
+                SaveState();
 
-            if (Input.GetKeyDown(KeyCode.RightArrow) && currentCol + 1 < GridMaker.instance.Cols && !GridMaker.instance.IsStop(currentRow, currentCol + 1, Vector2.right))
-            {
-                lastDirection = Vector2.right;
-                ChangeSprite();
-                List<GameObject> movingObject = new List<GameObject>();
-                movingObject.Add(this.gameObject);
-                for (int c = currentCol + 1; c < GridMaker.instance.Cols - 1; c++)
+                if (Input.GetKey(KeyCode.RightArrow) && currentCol + 1 < GridMaker.instance.Cols && !GridMaker.instance.IsStop(currentRow, currentCol + 1, Vector2.right))
                 {
-                    if (GridMaker.instance.IsTherePushableObjectAt(currentRow, c))
-                        movingObject.Add(GridMaker.instance.GetPushableObjectAt(currentRow, c));
-                    else
-                        break;
+                    lastDirection = Vector2.right;
+                    ChangeSprite();
+                    List<GameObject> movingObject = new List<GameObject>();
+                    movingObject.Add(this.gameObject);
+                    for (int c = currentCol + 1; c < GridMaker.instance.Cols - 1; c++)
+                    {
+                        if (GridMaker.instance.IsTherePushableObjectAt(currentRow, c))
+                            movingObject.Add(GridMaker.instance.GetPushableObjectAt(currentRow, c));
+                        else
+                            break;
+                    }
+                    foreach (GameObject g in movingObject)
+                    {
+                        g.transform.position = new Vector3(g.transform.position.x + 1, g.transform.position.y, g.transform.position.z);
+                        g.GetComponent<CellProperty>().currentCol++;
+                    }
+                    GridMaker.instance.CompileRules();
+                    CheckWin();
+                    lastMoveTime = Time.time;
                 }
-                foreach (GameObject g in movingObject)
+                else if (Input.GetKey(KeyCode.LeftArrow) && currentCol - 1 >= 0 && !GridMaker.instance.IsStop(currentRow, currentCol - 1, Vector2.left))
                 {
-                    g.transform.position = new Vector3(g.transform.position.x + 1, g.transform.position.y, g.transform.position.z);
-                    g.GetComponent<CellProperty>().currentCol++;
+                    lastDirection = Vector2.left;
+                    ChangeSprite();
+                    List<GameObject> movingObject = new List<GameObject>();
+                    movingObject.Add(this.gameObject);
+                    for (int c = currentCol - 1; c > 0; c--)
+                    {
+                        if (GridMaker.instance.IsTherePushableObjectAt(currentRow, c))
+                            movingObject.Add(GridMaker.instance.GetPushableObjectAt(currentRow, c));
+                        else
+                            break;
+                    }
+                    foreach (GameObject g in movingObject)
+                    {
+                        g.transform.position = new Vector3(g.transform.position.x - 1, g.transform.position.y, g.transform.position.z);
+                        g.GetComponent<CellProperty>().currentCol--;
+                    }
+                    GridMaker.instance.CompileRules();
+                    CheckWin();
+                    lastMoveTime = Time.time;
                 }
-                GridMaker.instance.CompileRules();
-                CheckWin();
-            }
-            else if (Input.GetKeyDown(KeyCode.LeftArrow) && currentCol - 1 >= 0 && !GridMaker.instance.IsStop(currentRow, currentCol - 1, Vector2.left))
-            {
-                lastDirection = Vector2.left;
-                ChangeSprite();
-                List<GameObject> movingObject = new List<GameObject>();
-                movingObject.Add(this.gameObject);
-                for (int c = currentCol - 1; c > 0; c--)
+                else if (Input.GetKey(KeyCode.UpArrow) && currentRow + 1 < GridMaker.instance.Rows && !GridMaker.instance.IsStop(currentRow + 1, currentCol, Vector2.up))
                 {
-                    if (GridMaker.instance.IsTherePushableObjectAt(currentRow, c))
-                        movingObject.Add(GridMaker.instance.GetPushableObjectAt(currentRow, c));
-                    else
-                        break;
+                    lastDirection = Vector2.up;
+                    ChangeSprite();
+                    List<GameObject> movingObject = new List<GameObject>();
+                    movingObject.Add(this.gameObject);
+                    for (int r = currentRow + 1; r < GridMaker.instance.Rows - 1; r++)
+                    {
+                        if (GridMaker.instance.IsTherePushableObjectAt(r, currentCol))
+                            movingObject.Add(GridMaker.instance.GetPushableObjectAt(r, currentCol));
+                        else
+                            break;
+                    }
+                    foreach (GameObject g in movingObject)
+                    {
+                        g.transform.position = new Vector3(g.transform.position.x, g.transform.position.y + 1, g.transform.position.z);
+                        g.GetComponent<CellProperty>().currentRow++;
+                    }
+                    GridMaker.instance.CompileRules();
+                    CheckWin();
+                    lastMoveTime = Time.time;
                 }
-                foreach (GameObject g in movingObject)
+                else if (Input.GetKey(KeyCode.DownArrow) && currentRow - 1 >= 0 && !GridMaker.instance.IsStop(currentRow - 1, currentCol, Vector2.down))
                 {
-                    g.transform.position = new Vector3(g.transform.position.x - 1, g.transform.position.y, g.transform.position.z);
-                    g.GetComponent<CellProperty>().currentCol--;
+                    lastDirection = Vector2.down;
+                    ChangeSprite();
+                    List<GameObject> movingObject = new List<GameObject>();
+                    movingObject.Add(this.gameObject);
+                    for (int r = currentRow - 1; r >= 0; r--)
+                    {
+                        if (GridMaker.instance.IsTherePushableObjectAt(r, currentCol))
+                            movingObject.Add(GridMaker.instance.GetPushableObjectAt(r, currentCol));
+                        else
+                            break;
+                    }
+                    foreach (GameObject g in movingObject)
+                    {
+                        g.transform.position = new Vector3(g.transform.position.x, g.transform.position.y - 1, g.transform.position.z);
+                        g.GetComponent<CellProperty>().currentRow--;
+                    }
+                    GridMaker.instance.CompileRules();
+                    CheckWin();
+                    lastMoveTime = Time.time;
                 }
-                GridMaker.instance.CompileRules();
-                CheckWin();
-            }
-            else if (Input.GetKeyDown(KeyCode.UpArrow) && currentRow + 1 < GridMaker.instance.Rows && !GridMaker.instance.IsStop(currentRow + 1, currentCol, Vector2.up))
-            {
-                lastDirection = Vector2.up;
-                ChangeSprite();
-                List<GameObject> movingObject = new List<GameObject>();
-                movingObject.Add(this.gameObject);
-                for (int r = currentRow + 1; r < GridMaker.instance.Rows - 1; r++)
-                {
-                    if (GridMaker.instance.IsTherePushableObjectAt(r, currentCol))
-                        movingObject.Add(GridMaker.instance.GetPushableObjectAt(r, currentCol));
-                    else
-                        break;
-                }
-                foreach (GameObject g in movingObject)
-                {
-                    g.transform.position = new Vector3(g.transform.position.x, g.transform.position.y + 1, g.transform.position.z);
-                    g.GetComponent<CellProperty>().currentRow++;
-                }
-                GridMaker.instance.CompileRules();
-                CheckWin();
-            }
-            else if (Input.GetKeyDown(KeyCode.DownArrow) && currentRow - 1 >= 0 && !GridMaker.instance.IsStop(currentRow - 1, currentCol, Vector2.down))
-            {
-                lastDirection = Vector2.down;
-                ChangeSprite();
-                List<GameObject> movingObject = new List<GameObject>();
-                movingObject.Add(this.gameObject);
-                for (int r = currentRow - 1; r >= 0; r--)
-                {
-                    if (GridMaker.instance.IsTherePushableObjectAt(r, currentCol))
-                        movingObject.Add(GridMaker.instance.GetPushableObjectAt(r, currentCol));
-                    else
-                        break;
-                }
-                foreach (GameObject g in movingObject)
-                {
-
-                    g.transform.position = new Vector3(g.transform.position.x, g.transform.position.y - 1, g.transform.position.z);
-                    g.GetComponent<CellProperty>().currentRow--;
-                }
-                GridMaker.instance.CompileRules();
-                CheckWin();
             }
         }
+    }
+
+    // Сохранение состояния перед движением
+    private void SaveState()
+    {
+        MoveState state = new MoveState();
+        state.positions = new List<(GameObject, int, int)>();
+
+        // Сохраняем позицию игрока
+        state.positions.Add((this.gameObject, currentRow, currentCol));
+
+        // Сохраняем позиции всех толкаемых объектов
+        foreach (GameObject g in GridMaker.instance.cells)
+        {
+            if (g != null && g.GetComponent<CellProperty>().IsPushable)
+            {
+                CellProperty cp = g.GetComponent<CellProperty>();
+                state.positions.Add((g, cp.CurrentRow, cp.CurrentCol));
+            }
+        }
+
+        moveHistory.Push(state);
+    }
+
+    // Отмена последнего движения
+    private void UndoMove()
+    {
+        MoveState lastState = moveHistory.Pop();
+
+        foreach (var (obj, row, col) in lastState.positions)
+        {
+            CellProperty cp = obj.GetComponent<CellProperty>();
+            cp.currentRow = row;
+            cp.currentCol = col;
+            obj.transform.position = new Vector3(col, row, obj.transform.position.z);
+        }
+
+        // Восстанавливаем направление хомяка
+        if (lastDirection == Vector2.right) lastDirection = Vector2.left;
+        else if (lastDirection == Vector2.left) lastDirection = Vector2.right;
+        else if (lastDirection == Vector2.up) lastDirection = Vector2.down;
+        else if (lastDirection == Vector2.down) lastDirection = Vector2.up;
+        ChangeSprite();
+
+        GridMaker.instance.CompileRules();
     }
 
     public void CheckWin()

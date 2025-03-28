@@ -13,6 +13,7 @@ public class GridMaker : MonoBehaviour
     public static GridMaker instance = null;
     public GameObject boundary;
     int currentLevel = 0;
+
     public int Rows
     {
         get { return rows; }
@@ -22,6 +23,7 @@ public class GridMaker : MonoBehaviour
     {
         get { return cols; }
     }
+
     private void Awake()
     {
         if (instance == null)
@@ -62,9 +64,8 @@ public class GridMaker : MonoBehaviour
             {
                 if (gI == -1 || gJ == -1 || gI == rows || gJ == rows)
                     Instantiate(boundary, new Vector3(gI, gJ, 0), Quaternion.identity);
-            } 
+            }
         }
-
 
         int counter = 0;
         for (int i = 0; i < levelHolder[currentLevel].level.Count; i++)
@@ -76,13 +77,9 @@ public class GridMaker : MonoBehaviour
                 ElementTypes currentElement = levelHolder[currentLevel].level[i];
 
                 g.GetComponent<CellProperty>().AssignInfo(counter / rows, counter % cols, currentElement);
-                //Debug.Log( currentElement.ToString() + "R : " + i / rows + " C : " + i % cols);
-
-
             }
             counter++;
         }
-
     }
 
     public Sprite ReturnSpriteOf(ElementTypes e)
@@ -94,7 +91,6 @@ public class GridMaker : MonoBehaviour
     {
         return new Vector2(i % cols, i / rows);
     }
-
 
     public bool IsStop(int r, int c, Vector2 dir)
     {
@@ -150,14 +146,6 @@ public class GridMaker : MonoBehaviour
 
                 if (IsElementStartingWord(currentcell.Element))
                 {
-
-                    /*if (DoesListContainElement(FindObjectsAt(currentcell.CurrentRow + 1, currentcell.CurrentCol), ElementTypes.IsWord))
-                    {
-                        if (DoesListContainWord(FindObjectsAt(currentcell.CurrentRow +2, currentcell.CurrentCol)))
-                        {
-                            Rule(currentcell.Element, ReturnWordAt(currentcell.CurrentRow + 2, currentcell.CurrentCol));
-                        }
-                    }*/
                     if (DoesListContainElement(FindObjectsAt(currentcell.CurrentRow - 1, currentcell.CurrentCol), ElementTypes.IsWord))
                     {
                         if (DoesListContainWord(FindObjectsAt(currentcell.CurrentRow - 2, currentcell.CurrentCol)))
@@ -172,20 +160,10 @@ public class GridMaker : MonoBehaviour
                             Rule(currentcell.Element, ReturnWordAt(currentcell.CurrentRow, currentcell.CurrentCol + 2));
                         }
                     }
-
-                    /*if (DoesListContainElement(FindObjectsAt(currentcell.CurrentRow, currentcell.CurrentCol -1), ElementTypes.IsWord))
-                    {
-                        if (DoesListContainWord(FindObjectsAt(currentcell.CurrentRow, currentcell.CurrentCol - 2)))
-                        {
-                            Rule(currentcell.Element, ReturnWordAt(currentcell.CurrentRow, currentcell.CurrentCol - 2));
-                        }
-                    }*/
                 }
             }
-
         }
     }
-
 
     public ElementTypes GetActualObjectFromWord(ElementTypes e)
     {
@@ -205,16 +183,17 @@ public class GridMaker : MonoBehaviour
         {
             return ElementTypes.Wall;
         }
+        else if (e == ElementTypes.RatWord) // Добавляем крысу
+        {
+            return ElementTypes.Rat;
+        }
         return ElementTypes.Empty;
-
     }
-
 
     public void Rule(ElementTypes a, ElementTypes b)
     {
         if ((int)b >= 100 && (int)b < 150)
         {
-            //Replace all a objects to b
             List<CellProperty> cellsOf = GetAllCellsOf(GetActualObjectFromWord(a));
             for (int i = 0; i < cellsOf.Count; i++)
             {
@@ -223,18 +202,15 @@ public class GridMaker : MonoBehaviour
         }
         else if ((int)b >= 150)
         {
-            //Properties change
             if (b == ElementTypes.YouWord)
             {
                 foreach (CellProperty p in GetAllCellsOf(GetActualObjectFromWord(a)))
                 {
                     p.IsPlayer(true);
                 }
-                //player property true
             }
             else if (b == ElementTypes.PushWord)
             {
-                //pushable property true
                 foreach (CellProperty p in GetAllCellsOf(GetActualObjectFromWord(a)))
                 {
                     p.IsItPushable(true);
@@ -242,7 +218,6 @@ public class GridMaker : MonoBehaviour
             }
             else if (b == ElementTypes.WinWord)
             {
-                //win property true
                 foreach (CellProperty p in GetAllCellsOf(GetActualObjectFromWord(a)))
                 {
                     p.IsItWin(true);
@@ -250,14 +225,12 @@ public class GridMaker : MonoBehaviour
             }
             else if (b == ElementTypes.StopWord)
             {
-                //stop property true
                 foreach (CellProperty p in GetAllCellsOf(GetActualObjectFromWord(a)))
                 {
                     p.IsItStop(true);
                 }
             }
         }
-
     }
 
     public void ResetData()
@@ -293,7 +266,6 @@ public class GridMaker : MonoBehaviour
             }
         }
         return cellProp;
-
     }
 
     public bool IsTherePushableObjectAt(int r, int c)
@@ -308,7 +280,6 @@ public class GridMaker : MonoBehaviour
             }
         }
         return false;
-
     }
 
     public GameObject GetPushableObjectAt(int r, int c)
@@ -322,7 +293,6 @@ public class GridMaker : MonoBehaviour
                 return g;
             }
         }
-
         return null;
     }
 
@@ -351,7 +321,6 @@ public class GridMaker : MonoBehaviour
             {
                 return e;
             }
-
         }
         return ElementTypes.Empty;
     }
@@ -380,7 +349,6 @@ public class GridMaker : MonoBehaviour
         return false;
     }
 
-
     public bool IsElementIsWord(ElementTypes e)
     {
         if ((int)e == 99)
@@ -402,10 +370,10 @@ public class GridMaker : MonoBehaviour
         }
     }
 }
+
 [System.Serializable]
 public class SpriteLibrary
 {
-
     public ElementTypes element;
     public Sprite sprite;
 }

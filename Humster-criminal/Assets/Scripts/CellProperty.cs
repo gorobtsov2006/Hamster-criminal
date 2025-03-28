@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
 public class CellProperty : MonoBehaviour
 {
     ElementTypes element;
@@ -10,7 +11,9 @@ public class CellProperty : MonoBehaviour
     bool isWin;
     bool isPlayer;
     bool isStop;
+    bool isDangerous; // Добавляем свойство для крыс
     int currentRow, currentCol;
+
     public ElementTypes Element
     {
         get { return element; }
@@ -34,7 +37,6 @@ public class CellProperty : MonoBehaviour
 
     SpriteRenderer spriteRenderer;
 
-
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -50,14 +52,16 @@ public class CellProperty : MonoBehaviour
         {
             isStop = true;
         }
-
         if (e == ElementTypes.Hamster)
         {
             isPlayer = true;
             spriteRenderer.sortingOrder = 100;
         }
+        if (e == ElementTypes.Rat) // Крыса опасна
+        {
+            isDangerous = true;
+        }
     }
-
 
     public void Initialize()
     {
@@ -66,17 +70,21 @@ public class CellProperty : MonoBehaviour
         isWin = false;
         isPlayer = false;
         isStop = false;
+        isDangerous = false; // Сбрасываем опасность
 
         if ((int)element >= 99)
         {
             isPushable = true;
+        }
+        if (element == ElementTypes.Rat) // Крыса остается опасной
+        {
+            isDangerous = true;
         }
     }
 
     public void ChangeSprite()
     {
         Sprite s = GridMaker.instance.spriteLibrary.Find(x => x.element == element).sprite;
-
         spriteRenderer.sprite = s;
 
         if (isPlayer || isPushable)
@@ -89,7 +97,6 @@ public class CellProperty : MonoBehaviour
         }
     }
 
-
     public void ChangeObject(CellProperty c)
     {
         element = c.element;
@@ -98,9 +105,9 @@ public class CellProperty : MonoBehaviour
         isWin = c.isWin;
         isPlayer = c.isPlayer;
         isStop = c.IsStop;
+        isDangerous = c.isDangerous; // Копируем свойство опасности
         ChangeSprite();
     }
-
 
     public void IsPlayer(bool isP)
     {
@@ -124,12 +131,17 @@ public class CellProperty : MonoBehaviour
     {
         destroysObject = isD;
     }
+    public void IsItDangerous(bool isDang)
+    {
+        isDangerous = isDang;
+    }
 
     void Update()
     {
         CheckDestroy();
         if (isPlayer)
         {
+            CheckDanger(); // Проверяем опасность от крыс
 
             if (Input.GetKeyDown(KeyCode.RightArrow) && currentCol + 1 < GridMaker.instance.Cols && !GridMaker.instance.IsStop(currentRow, currentCol + 1, Vector2.right))
             {
@@ -245,7 +257,6 @@ public class CellProperty : MonoBehaviour
         }
     }
 
-
     public void CheckDestroy()
     {
         List<GameObject> objectsAtPosition = GridMaker.instance.FindObjectsAt(currentRow, currentCol);
@@ -268,6 +279,27 @@ public class CellProperty : MonoBehaviour
             foreach (GameObject g in objectsAtPosition)
             {
                 Destroy(g);
+            }
+        }
+    }
+
+    public void CheckDanger()
+    {
+        // Проверяем соседние клетки на наличие крыс
+        List<Vector2> directions = new List<Vector2> { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
+        foreach (Vector2 dir in directions)
+        {
+            int checkRow = currentRow + (int)dir.y;
+            int checkCol = currentCol + (int)dir.x;
+            List<GameObject> objectsAtPosition = GridMaker.instance.FindObjectsAt(checkRow, checkCol);
+            foreach (GameObject g in objectsAtPosition)
+            {
+                if (g.GetComponent<CellProperty>().isDangerous)
+                {
+                    Debug.Log("Player Died!");
+                    SceneManager.LoadScene(SceneManager.GetActiveScene().name); // Перезапуск уровня
+                    return;
+                }
             }
         }
     }

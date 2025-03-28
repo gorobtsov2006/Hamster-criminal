@@ -9,12 +9,14 @@ public enum ElementTypes
     Wall,
     Box,
     Goal,
+    Rat, 
 
     IsWord = 99,
     HamsterWord = 100,
     WallWord,
     GoalWord,
     BoxWord,
+    RatWord, 
 
     YouWord = 200,
     PushWord,
@@ -50,7 +52,6 @@ public class LevelCreator : ScriptableObject
 
     private void OnValidate()
     {
-
         int newSize = gridWidth * gridHeight;
         if (level.Count != newSize)
         {

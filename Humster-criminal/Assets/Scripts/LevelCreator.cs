@@ -9,14 +9,14 @@ public enum ElementTypes
     Wall,
     Box,
     Goal,
-    Rat, 
+    Rat,
 
     IsWord = 99,
     HamsterWord = 100,
     WallWord,
     GoalWord,
     BoxWord,
-    RatWord, 
+    RatWord,
 
     YouWord = 200,
     PushWord,

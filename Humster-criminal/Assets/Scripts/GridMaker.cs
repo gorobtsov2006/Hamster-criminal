@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.U2D.Animation;
 
 public class GridMaker : MonoBehaviour
 {
@@ -75,16 +76,23 @@ public class GridMaker : MonoBehaviour
                 GameObject g = Instantiate(cellHolder, new Vector3(counter % cols, counter / rows, 0), Quaternion.identity);
                 cells.Add(g);
                 ElementTypes currentElement = levelHolder[currentLevel].level[i];
-
                 g.GetComponent<CellProperty>().AssignInfo(counter / rows, counter % cols, currentElement);
             }
             counter++;
         }
     }
 
-    public Sprite ReturnSpriteOf(ElementTypes e)
+    public Sprite ReturnSpriteOf(ElementTypes e, Vector2 direction)
     {
-        return spriteLibrary.Find(x => x.element == e).sprite;
+        SpriteLibrary lib = spriteLibrary.Find(x => x.element == e);
+        if (e == ElementTypes.Hamster && lib.hamsterSprites != null)
+        {
+            if (direction == Vector2.right) return lib.hamsterSprites.rightSprite;
+            if (direction == Vector2.left) return lib.hamsterSprites.leftSprite;
+            if (direction == Vector2.up) return lib.hamsterSprites.upSprite;
+            if (direction == Vector2.down) return lib.hamsterSprites.downSprite;
+        }
+        return lib.sprite; // Обычный спрайт для других объектов
     }
 
     public Vector2 Return2D(int i)
@@ -102,38 +110,26 @@ public class GridMaker : MonoBehaviour
         foreach (GameObject g in atRC)
         {
             CellProperty currentCell = g.GetComponent<CellProperty>();
-
             if (currentCell.IsStop)
-            {
                 return true;
-            }
             else if (currentCell.IsPushable)
-            {
                 isPush = true;
-            }
         }
 
         if (!isPush)
             return false;
 
         if (dir == Vector2.right)
-        {
             return IsStop(curRow, curCol + 1, Vector2.right);
-        }
         else if (dir == Vector2.left)
-        {
             return IsStop(curRow, curCol - 1, Vector2.left);
-        }
         else if (dir == Vector2.up)
-        {
             return IsStop(curRow + 1, curCol, Vector2.up);
-        }
         else if (dir == Vector2.down)
-        {
             return IsStop(curRow - 1, curCol, Vector2.down);
-        }
         return true;
     }
+
 
     public void CompileRules()
     {
@@ -143,7 +139,6 @@ public class GridMaker : MonoBehaviour
             if (cells[i] != null)
             {
                 CellProperty currentcell = cells[i].GetComponent<CellProperty>();
-
                 if (IsElementStartingWord(currentcell.Element))
                 {
                     if (DoesListContainElement(FindObjectsAt(currentcell.CurrentRow - 1, currentcell.CurrentCol), ElementTypes.IsWord))
@@ -167,26 +162,11 @@ public class GridMaker : MonoBehaviour
 
     public ElementTypes GetActualObjectFromWord(ElementTypes e)
     {
-        if (e == ElementTypes.HamsterWord)
-        {
-            return ElementTypes.Hamster;
-        }
-        else if (e == ElementTypes.GoalWord)
-        {
-            return ElementTypes.Goal;
-        }
-        else if (e == ElementTypes.BoxWord)
-        {
-            return ElementTypes.Box;
-        }
-        else if (e == ElementTypes.WallWord)
-        {
-            return ElementTypes.Wall;
-        }
-        else if (e == ElementTypes.RatWord) // Добавляем крысу
-        {
-            return ElementTypes.Rat;
-        }
+        if (e == ElementTypes.HamsterWord) return ElementTypes.Hamster;
+        else if (e == ElementTypes.GoalWord) return ElementTypes.Goal;
+        else if (e == ElementTypes.BoxWord) return ElementTypes.Box;
+        else if (e == ElementTypes.WallWord) return ElementTypes.Wall;
+        else if (e == ElementTypes.RatWord) return ElementTypes.Rat;
         return ElementTypes.Empty;
     }
 
@@ -205,30 +185,22 @@ public class GridMaker : MonoBehaviour
             if (b == ElementTypes.YouWord)
             {
                 foreach (CellProperty p in GetAllCellsOf(GetActualObjectFromWord(a)))
-                {
                     p.IsPlayer(true);
-                }
             }
             else if (b == ElementTypes.PushWord)
             {
                 foreach (CellProperty p in GetAllCellsOf(GetActualObjectFromWord(a)))
-                {
                     p.IsItPushable(true);
-                }
             }
             else if (b == ElementTypes.WinWord)
             {
                 foreach (CellProperty p in GetAllCellsOf(GetActualObjectFromWord(a)))
-                {
                     p.IsItWin(true);
-                }
             }
             else if (b == ElementTypes.StopWord)
             {
                 foreach (CellProperty p in GetAllCellsOf(GetActualObjectFromWord(a)))
-                {
                     p.IsItStop(true);
-                }
             }
         }
     }
@@ -247,9 +219,7 @@ public class GridMaker : MonoBehaviour
         foreach (GameObject g in cells)
         {
             if (g != null && g.GetComponent<CellProperty>().Element == e)
-            {
                 return g.GetComponent<CellProperty>();
-            }
         }
         return null;
     }
@@ -257,27 +227,22 @@ public class GridMaker : MonoBehaviour
     public List<CellProperty> GetAllCellsOf(ElementTypes e)
     {
         List<CellProperty> cellProp = new List<CellProperty>();
-
         foreach (GameObject g in cells)
         {
             if (g != null && g.GetComponent<CellProperty>().Element == e)
-            {
                 cellProp.Add(g.GetComponent<CellProperty>());
-            }
         }
         return cellProp;
     }
 
+
     public bool IsTherePushableObjectAt(int r, int c)
     {
         List<GameObject> objectsAtRC = FindObjectsAt(r, c);
-
         foreach (GameObject g in objectsAtRC)
         {
             if (g.GetComponent<CellProperty>().IsPushable)
-            {
                 return true;
-            }
         }
         return false;
     }
@@ -285,24 +250,17 @@ public class GridMaker : MonoBehaviour
     public GameObject GetPushableObjectAt(int r, int c)
     {
         List<GameObject> objectsAtRC = FindObjectsAt(r, c);
-
         foreach (GameObject g in objectsAtRC)
         {
             if (g.GetComponent<CellProperty>().IsPushable)
-            {
                 return g;
-            }
         }
         return null;
     }
 
     public bool IsElementStartingWord(ElementTypes e)
     {
-        if ((int)e >= 100 && (int)e < 150)
-        {
-            return true;
-        }
-        return false;
+        return (int)e >= 100 && (int)e < 150;
     }
 
     public List<GameObject> FindObjectsAt(int r, int c)
@@ -313,14 +271,11 @@ public class GridMaker : MonoBehaviour
     public ElementTypes ReturnWordAt(int r, int c)
     {
         List<GameObject> l = FindObjectsAt(r, c);
-
         foreach (GameObject g in l)
         {
             ElementTypes e = g.GetComponent<CellProperty>().Element;
             if ((int)e >= 100)
-            {
                 return e;
-            }
         }
         return ElementTypes.Empty;
     }
@@ -330,9 +285,7 @@ public class GridMaker : MonoBehaviour
         foreach (GameObject g in l)
         {
             if (g.GetComponent<CellProperty>().Element == e)
-            {
                 return true;
-            }
         }
         return false;
     }
@@ -342,32 +295,22 @@ public class GridMaker : MonoBehaviour
         foreach (GameObject g in l)
         {
             if ((int)g.GetComponent<CellProperty>().Element >= 100)
-            {
                 return true;
-            }
         }
         return false;
     }
 
     public bool IsElementIsWord(ElementTypes e)
     {
-        if ((int)e == 99)
-        {
-            return true;
-        }
-        return false;
+        return (int)e == 99;
     }
 
     public void NextLevel()
     {
         if (PlayerPrefs.GetInt("Level") >= levelHolder.Count)
-        {
             SceneManager.LoadScene("Menu");
-        }
         else
-        {
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        }
     }
 }
 
@@ -375,5 +318,15 @@ public class GridMaker : MonoBehaviour
 public class SpriteLibrary
 {
     public ElementTypes element;
-    public Sprite sprite;
+    public Sprite sprite; // Обычный спрайт для всех, кроме хомяка
+    public HamsterSprites hamsterSprites; // Специальные спрайты для хомяка
+}
+
+[System.Serializable]
+public class HamsterSprites
+{
+    public Sprite rightSprite;
+    public Sprite leftSprite;
+    public Sprite upSprite;
+    public Sprite downSprite;
 }

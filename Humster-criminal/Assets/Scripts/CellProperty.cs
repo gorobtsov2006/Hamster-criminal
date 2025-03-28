@@ -11,8 +11,9 @@ public class CellProperty : MonoBehaviour
     bool isWin;
     bool isPlayer;
     bool isStop;
-    bool isDangerous; // Добавляем свойство для крыс
+    bool isDangerous;
     int currentRow, currentCol;
+    Vector2 lastDirection = Vector2.right; // По умолчанию смотрит вправо
 
     public ElementTypes Element
     {
@@ -49,18 +50,14 @@ public class CellProperty : MonoBehaviour
         element = e;
         ChangeSprite();
         if (e == ElementTypes.Wall)
-        {
             isStop = true;
-        }
         if (e == ElementTypes.Hamster)
         {
             isPlayer = true;
             spriteRenderer.sortingOrder = 100;
         }
-        if (e == ElementTypes.Rat) // Крыса опасна
-        {
+        if (e == ElementTypes.Rat)
             isDangerous = true;
-        }
     }
 
     public void Initialize()
@@ -70,31 +67,25 @@ public class CellProperty : MonoBehaviour
         isWin = false;
         isPlayer = false;
         isStop = false;
-        isDangerous = false; // Сбрасываем опасность
+        isDangerous = false;
 
         if ((int)element >= 99)
-        {
             isPushable = true;
-        }
-        if (element == ElementTypes.Rat) // Крыса остается опасной
-        {
+        if (element == ElementTypes.Rat)
             isDangerous = true;
-        }
     }
 
     public void ChangeSprite()
     {
-        Sprite s = GridMaker.instance.spriteLibrary.Find(x => x.element == element).sprite;
-        spriteRenderer.sprite = s;
+        if (element == ElementTypes.Hamster)
+            spriteRenderer.sprite = GridMaker.instance.ReturnSpriteOf(element, lastDirection);
+        else
+            spriteRenderer.sprite = GridMaker.instance.ReturnSpriteOf(element, Vector2.zero);
 
         if (isPlayer || isPushable)
-        {
             spriteRenderer.sortingOrder = 100;
-        }
         else
-        {
             spriteRenderer.sortingOrder = 10;
-        }
     }
 
     public void ChangeObject(CellProperty c)
@@ -105,7 +96,7 @@ public class CellProperty : MonoBehaviour
         isWin = c.isWin;
         isPlayer = c.isPlayer;
         isStop = c.IsStop;
-        isDangerous = c.isDangerous; // Копируем свойство опасности
+        isDangerous = c.isDangerous;
         ChangeSprite();
     }
 
@@ -141,23 +132,21 @@ public class CellProperty : MonoBehaviour
         CheckDestroy();
         if (isPlayer)
         {
-            CheckDanger(); // Проверяем опасность от крыс
+            CheckDanger();
+
 
             if (Input.GetKeyDown(KeyCode.RightArrow) && currentCol + 1 < GridMaker.instance.Cols && !GridMaker.instance.IsStop(currentRow, currentCol + 1, Vector2.right))
             {
+                lastDirection = Vector2.right;
+                ChangeSprite();
                 List<GameObject> movingObject = new List<GameObject>();
                 movingObject.Add(this.gameObject);
-
                 for (int c = currentCol + 1; c < GridMaker.instance.Cols - 1; c++)
                 {
                     if (GridMaker.instance.IsTherePushableObjectAt(currentRow, c))
-                    {
                         movingObject.Add(GridMaker.instance.GetPushableObjectAt(currentRow, c));
-                    }
                     else
-                    {
                         break;
-                    }
                 }
                 foreach (GameObject g in movingObject)
                 {
@@ -169,19 +158,16 @@ public class CellProperty : MonoBehaviour
             }
             else if (Input.GetKeyDown(KeyCode.LeftArrow) && currentCol - 1 >= 0 && !GridMaker.instance.IsStop(currentRow, currentCol - 1, Vector2.left))
             {
+                lastDirection = Vector2.left;
+                ChangeSprite();
                 List<GameObject> movingObject = new List<GameObject>();
                 movingObject.Add(this.gameObject);
-
                 for (int c = currentCol - 1; c > 0; c--)
                 {
                     if (GridMaker.instance.IsTherePushableObjectAt(currentRow, c))
-                    {
                         movingObject.Add(GridMaker.instance.GetPushableObjectAt(currentRow, c));
-                    }
                     else
-                    {
                         break;
-                    }
                 }
                 foreach (GameObject g in movingObject)
                 {
@@ -193,19 +179,16 @@ public class CellProperty : MonoBehaviour
             }
             else if (Input.GetKeyDown(KeyCode.UpArrow) && currentRow + 1 < GridMaker.instance.Rows && !GridMaker.instance.IsStop(currentRow + 1, currentCol, Vector2.up))
             {
+                lastDirection = Vector2.up;
+                ChangeSprite();
                 List<GameObject> movingObject = new List<GameObject>();
                 movingObject.Add(this.gameObject);
-
                 for (int r = currentRow + 1; r < GridMaker.instance.Rows - 1; r++)
                 {
                     if (GridMaker.instance.IsTherePushableObjectAt(r, currentCol))
-                    {
                         movingObject.Add(GridMaker.instance.GetPushableObjectAt(r, currentCol));
-                    }
                     else
-                    {
                         break;
-                    }
                 }
                 foreach (GameObject g in movingObject)
                 {
@@ -217,22 +200,20 @@ public class CellProperty : MonoBehaviour
             }
             else if (Input.GetKeyDown(KeyCode.DownArrow) && currentRow - 1 >= 0 && !GridMaker.instance.IsStop(currentRow - 1, currentCol, Vector2.down))
             {
+                lastDirection = Vector2.down;
+                ChangeSprite();
                 List<GameObject> movingObject = new List<GameObject>();
                 movingObject.Add(this.gameObject);
-
                 for (int r = currentRow - 1; r >= 0; r--)
                 {
                     if (GridMaker.instance.IsTherePushableObjectAt(r, currentCol))
-                    {
                         movingObject.Add(GridMaker.instance.GetPushableObjectAt(r, currentCol));
-                    }
                     else
-                    {
                         break;
-                    }
                 }
                 foreach (GameObject g in movingObject)
                 {
+
                     g.transform.position = new Vector3(g.transform.position.x, g.transform.position.y - 1, g.transform.position.z);
                     g.GetComponent<CellProperty>().currentRow--;
                 }
@@ -245,7 +226,6 @@ public class CellProperty : MonoBehaviour
     public void CheckWin()
     {
         List<GameObject> objectsAtPlayerPosition = GridMaker.instance.FindObjectsAt(currentRow, currentCol);
-
         foreach (GameObject g in objectsAtPlayerPosition)
         {
             if (g.GetComponent<CellProperty>().isWin)
@@ -265,27 +245,20 @@ public class CellProperty : MonoBehaviour
         foreach (GameObject g in objectsAtPosition)
         {
             if (!g.GetComponent<CellProperty>().destroysObject)
-            {
                 normalObject = true;
-            }
             if (g.GetComponent<CellProperty>().destroysObject)
-            {
                 destroys = true;
-            }
         }
 
         if (destroys && normalObject)
         {
             foreach (GameObject g in objectsAtPosition)
-            {
                 Destroy(g);
-            }
         }
     }
 
     public void CheckDanger()
     {
-        // Проверяем соседние клетки на наличие крыс
         List<Vector2> directions = new List<Vector2> { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
         foreach (Vector2 dir in directions)
         {
@@ -297,7 +270,7 @@ public class CellProperty : MonoBehaviour
                 if (g.GetComponent<CellProperty>().isDangerous)
                 {
                     Debug.Log("Player Died!");
-                    SceneManager.LoadScene(SceneManager.GetActiveScene().name); // Перезапуск уровня
+                    SceneManager.LoadScene(SceneManager.GetActiveScene().name);
                     return;
                 }
             }

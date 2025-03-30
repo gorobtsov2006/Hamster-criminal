@@ -12,6 +12,7 @@ public class CellProperty : MonoBehaviour
     bool isPlayer;
     bool isStop;
     bool isDangerous;
+    bool isKill; // Новое свойство для убийства
     int currentRow, currentCol;
     Vector2 lastDirection = Vector2.right;
 
@@ -29,6 +30,10 @@ public class CellProperty : MonoBehaviour
     private Stack<MoveState> moveHistory = new Stack<MoveState>(); // История движений
     private bool isUndoing = false; // Флаг для блокировки движения во время отмены
 
+    // Визуализация зон поражения
+    private List<GameObject> dangerIndicators = new List<GameObject>(); // Список индикаторов
+    public GameObject dangerZonePrefab; // Префаб индикатора (назначьте в Inspector)
+
     public ElementTypes Element
     {
         get { return element; }
@@ -40,6 +45,10 @@ public class CellProperty : MonoBehaviour
     public bool IsPushable
     {
         get { return isPushable; }
+    }
+    public bool IsKill
+    {
+        get { return isKill; }
     }
     public int CurrentRow
     {
@@ -55,6 +64,10 @@ public class CellProperty : MonoBehaviour
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        if (dangerZonePrefab == null)
+        {
+            Debug.LogError("DangerZonePrefab не назначен в CellProperty!");
+        }
     }
 
     public void AssignInfo(int r, int c, ElementTypes e)
@@ -75,6 +88,7 @@ public class CellProperty : MonoBehaviour
         if (e == ElementTypes.Rat)
         {
             isDangerous = true;
+            isKill = false; // Крыса не убивает по умолчанию
         }
     }
 
@@ -86,6 +100,7 @@ public class CellProperty : MonoBehaviour
         isPlayer = false;
         isStop = false;
         isDangerous = false;
+        isKill = false; // Инициализируем как false
 
         if ((int)element >= 99)
         {
@@ -95,6 +110,7 @@ public class CellProperty : MonoBehaviour
         {
             isDangerous = true;
         }
+        ClearDangerIndicators(); // Очищаем индикаторы при инициализации
     }
 
     public void ChangeSprite()
@@ -123,7 +139,9 @@ public class CellProperty : MonoBehaviour
         isPlayer = c.isPlayer;
         isStop = c.IsStop;
         isDangerous = c.isDangerous;
+        isKill = c.isKill; // Переносим свойство isKill
         ChangeSprite();
+        UpdateDangerIndicators(); // Обновляем индикаторы
     }
 
     public void IsPlayer(bool isP)
@@ -152,6 +170,12 @@ public class CellProperty : MonoBehaviour
     {
         isDangerous = isDang;
     }
+    public void IsItKill(bool isK)
+    {
+        Debug.Log($"IsItKill вызван для {element} на позиции ({currentRow}, {currentCol}): isKill = {isK}");
+        isKill = isK;
+        UpdateDangerIndicators();
+    }
 
     void Update()
     {
@@ -164,16 +188,13 @@ public class CellProperty : MonoBehaviour
             bool isMoving = Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.LeftArrow) ||
                             Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.DownArrow);
 
-
             if (isMoving && Time.time - lastMoveTime >= moveDelay)
             {
-                // Сохраняем состояние только при первом шаге движения
                 if (!isMovingLastFrame)
                 {
                     SaveState();
                 }
 
-                // Определяем направление движения
                 Vector2 direction = Vector2.zero;
                 if (Input.GetKey(KeyCode.RightArrow)) direction = Vector2.right;
                 else if (Input.GetKey(KeyCode.LeftArrow)) direction = Vector2.left;
@@ -188,11 +209,9 @@ public class CellProperty : MonoBehaviour
             }
             else
             {
-                // Сбрасываем флаг, когда игрок отпускает клавишу
                 isMovingLastFrame = false;
             }
 
-            // Отмена действия на клавишу Space (пробел)
             if (Input.GetKeyDown(KeyCode.Space) && moveHistory.Count > 0)
             {
                 isUndoing = true;
@@ -200,12 +219,10 @@ public class CellProperty : MonoBehaviour
                 isUndoing = false;
             }
 
-            // Обновляем флаг движения для следующего кадра
             isMovingLastFrame = isMoving;
         }
     }
 
-    // Проверка, можно ли двигаться в направлении
     private bool CanMove(Vector2 direction)
     {
         int newRow = currentRow + (int)direction.y;
@@ -215,7 +232,6 @@ public class CellProperty : MonoBehaviour
                !GridMaker.instance.IsStop(newRow, newCol, direction);
     }
 
-    // Движение игрока и толкаемых объектов
     private void Move(Vector2 direction)
     {
         lastDirection = direction;
@@ -247,7 +263,6 @@ public class CellProperty : MonoBehaviour
         CheckWin();
     }
 
-    // Сохранение состояния
     private void SaveState()
     {
         MoveState state = new MoveState
@@ -256,10 +271,8 @@ public class CellProperty : MonoBehaviour
             direction = lastDirection
         };
 
-        // Сохраняем позицию игрока
         state.positions.Add((this.gameObject, currentRow, currentCol));
 
-        // Сохраняем позиции всех толкаемых объектов
         foreach (GameObject obj in GridMaker.instance.cells)
         {
             if (obj != null && obj.GetComponent<CellProperty>().IsPushable)
@@ -273,14 +286,11 @@ public class CellProperty : MonoBehaviour
         Debug.Log($"Состояние сохранено: {moveHistory.Count}");
     }
 
-    // Отмена движения
     private void UndoMove()
     {
         MoveState lastState = moveHistory.Pop();
         Debug.Log($"Отмена движения, осталось в истории: {moveHistory.Count}");
 
-
-        // Восстанавливаем позиции объектов
         foreach (var (obj, row, col) in lastState.positions)
         {
             CellProperty cp = obj.GetComponent<CellProperty>();
@@ -289,7 +299,6 @@ public class CellProperty : MonoBehaviour
             obj.transform.position = new Vector3(col, row, obj.transform.position.z);
         }
 
-        // Восстанавливаем направление хомяка
         lastDirection = lastState.direction;
         ChangeSprite();
 
@@ -340,13 +349,54 @@ public class CellProperty : MonoBehaviour
             List<GameObject> objectsAtPosition = GridMaker.instance.FindObjectsAt(checkRow, checkCol);
             foreach (GameObject g in objectsAtPosition)
             {
-                if (g.GetComponent<CellProperty>().isDangerous)
+                if (g.GetComponent<CellProperty>().IsKill) // Проверяем isKill вместо isDangerous
                 {
-                    Debug.Log("Player Died!");
+                    Debug.Log("Player Died by Kill!");
                     SceneManager.LoadScene(SceneManager.GetActiveScene().name);
                     return;
                 }
             }
         }
+    }
+
+    private void UpdateDangerIndicators()
+    {
+        Debug.Log($"UpdateDangerIndicators вызван для {element} на позиции ({currentRow}, {currentCol})");
+        ClearDangerIndicators();
+
+        if (isKill && element == ElementTypes.Rat)
+        {
+            Debug.Log($"Создаю индикаторы для крысы на позиции ({currentRow}, {currentCol})");
+            List<Vector2> directions = new List<Vector2> { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
+            foreach (Vector2 dir in directions)
+            {
+                int checkRow = currentRow + (int)dir.y;
+                int checkCol = currentCol + (int)dir.x;
+                if (checkRow >= 0 && checkRow < GridMaker.instance.Rows && checkCol >= 0 && checkCol < GridMaker.instance.Cols)
+                {
+                    Debug.Log($"Создаю индикатор на позиции ({checkRow}, {checkCol})");
+                    GameObject indicator = Instantiate(dangerZonePrefab, new Vector3(checkCol, checkRow, 0), Quaternion.identity);
+                    indicator.transform.SetParent(transform.parent); // Привязываем к родителю
+                    dangerIndicators.Add(indicator);
+                }
+            }
+        }
+    }
+
+    private void ClearDangerIndicators()
+    {
+        foreach (GameObject indicator in dangerIndicators)
+        {
+            if (indicator != null)
+            {
+                Destroy(indicator);
+            }
+        }
+        dangerIndicators.Clear();
+    }
+
+    private void OnDestroy()
+    {
+        ClearDangerIndicators();
     }
 }

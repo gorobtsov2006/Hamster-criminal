@@ -22,6 +22,7 @@ public enum ElementTypes
     PushWord,
     WinWord,
     StopWord,
+    KillWord
 }
 
 [CreateAssetMenu(menuName = "Level Creator")]

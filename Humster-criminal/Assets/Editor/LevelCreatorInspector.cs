@@ -26,6 +26,7 @@ public class LevelCreatorInspector : Editor
         textureHolder.Add(ElementTypes.StopWord, (Texture)EditorGUIUtility.Load("Assets/Sprites/Tiles/Words/stopWord.png"));
         textureHolder.Add(ElementTypes.Rat, (Texture)EditorGUIUtility.Load("Assets/Sprites/Characters/Rat/RAT.png"));
         textureHolder.Add(ElementTypes.RatWord, (Texture)EditorGUIUtility.Load("Assets/Sprites/Tiles/Words/RATWORD.png"));
+        textureHolder.Add(ElementTypes.KillWord, (Texture)EditorGUIUtility.Load("Assets/Sprites/Tiles/Words/KILLWORD.png"));
     }
 
     ElementTypes currentSelected = ElementTypes.Empty;

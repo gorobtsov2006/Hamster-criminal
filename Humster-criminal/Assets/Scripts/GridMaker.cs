@@ -146,7 +146,6 @@ public class GridMaker : MonoBehaviour
         return true;
     }
 
-
     public void CompileRules()
     {
         ResetData();
@@ -157,18 +156,24 @@ public class GridMaker : MonoBehaviour
                 CellProperty currentcell = cells[i].GetComponent<CellProperty>();
                 if (IsElementStartingWord(currentcell.Element))
                 {
+                   
                     if (DoesListContainElement(FindObjectsAt(currentcell.CurrentRow - 1, currentcell.CurrentCol), ElementTypes.IsWord))
                     {
                         if (DoesListContainWord(FindObjectsAt(currentcell.CurrentRow - 2, currentcell.CurrentCol)))
                         {
-                            Rule(currentcell.Element, ReturnWordAt(currentcell.CurrentRow - 2, currentcell.CurrentCol));
+                            ElementTypes word = ReturnWordAt(currentcell.CurrentRow - 2, currentcell.CurrentCol);
+                            Debug.Log($"Обнаружено вертикальное правило: {currentcell.Element} IS {word} на позиции ({currentcell.CurrentRow}, {currentcell.CurrentCol})");
+                            Rule(currentcell.Element, word);
                         }
                     }
+                    
                     if (DoesListContainElement(FindObjectsAt(currentcell.CurrentRow, currentcell.CurrentCol + 1), ElementTypes.IsWord))
                     {
                         if (DoesListContainWord(FindObjectsAt(currentcell.CurrentRow, currentcell.CurrentCol + 2)))
                         {
-                            Rule(currentcell.Element, ReturnWordAt(currentcell.CurrentRow, currentcell.CurrentCol + 2));
+                            ElementTypes word = ReturnWordAt(currentcell.CurrentRow, currentcell.CurrentCol + 2);
+                            Debug.Log($"Обнаружено горизонтальное правило: {currentcell.Element} IS {word} на позиции ({currentcell.CurrentRow}, {currentcell.CurrentCol})");
+                            Rule(currentcell.Element, word);
                         }
                     }
                 }
@@ -218,6 +223,15 @@ public class GridMaker : MonoBehaviour
                 foreach (CellProperty p in GetAllCellsOf(GetActualObjectFromWord(a)))
                     p.IsItStop(true);
             }
+            else if (b == ElementTypes.KillWord)
+            {
+                Debug.Log($"Применяется правило {a} IS KILL");
+                foreach (CellProperty p in GetAllCellsOf(GetActualObjectFromWord(a)))
+                {
+                    Debug.Log($"Устанавливаю isKill = true для объекта {p.Element} на позиции ({p.CurrentRow}, {p.CurrentCol})");
+                    p.IsItKill(true);
+                }
+            }
         }
     }
 
@@ -250,7 +264,6 @@ public class GridMaker : MonoBehaviour
         }
         return cellProp;
     }
-
 
     public bool IsTherePushableObjectAt(int r, int c)
     {

@@ -14,7 +14,7 @@ public class LevelCreatorInspector : Editor
         textureHolder.Add(ElementTypes.Wall, (Texture)EditorGUIUtility.Load("Assets/Sprites/Tiles/Wall/wall.png"));
         textureHolder.Add(ElementTypes.Hamster, (Texture)EditorGUIUtility.Load("Assets/Sprites/Characters/Hamster/Hamster_right.png"));
         textureHolder.Add(ElementTypes.Box, (Texture)EditorGUIUtility.Load("Assets/Sprites/Tiles/Objects/box.png"));
-        textureHolder.Add(ElementTypes.Goal, (Texture)EditorGUIUtility.Load("Assets/Sprites/Tiles/Objects/goal.png"));
+        textureHolder.Add(ElementTypes.Goal, (Texture)EditorGUIUtility.Load("Assets/Sprites/Tiles/Objects/Coin.png"));
         textureHolder.Add(ElementTypes.IsWord, (Texture)EditorGUIUtility.Load("Assets/Sprites/Tiles/Words/isWord.png"));
         textureHolder.Add(ElementTypes.HamsterWord, (Texture)EditorGUIUtility.Load("Assets/Sprites/Tiles/Words/hamsterWord.png"));
         textureHolder.Add(ElementTypes.WallWord, (Texture)EditorGUIUtility.Load("Assets/Sprites/Tiles/Words/wallWord.png"));

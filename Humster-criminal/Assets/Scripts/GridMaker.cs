@@ -41,6 +41,22 @@ public class GridMaker : MonoBehaviour
         }
         currentLevel = PlayerPrefs.GetInt("Level");
 
+        Debug.Log("Current Level: " + currentLevel);
+        Debug.Log("Level Holder Count: " + levelHolder.Count);
+
+        if (levelHolder.Count == 0)
+        {
+            Debug.LogError("levelHolder пуст! Добавьте уровни в список в Unity Inspector.");
+            return;
+        }
+
+        if (currentLevel < 0 || currentLevel >= levelHolder.Count)
+        {
+            Debug.LogError($"currentLevel ({currentLevel}) вне диапазона. Допустимый диапазон: 0–{levelHolder.Count - 1}. Устанавливаю уровень 0.");
+            currentLevel = 0;
+            PlayerPrefs.SetInt("Level", 0);
+        }
+
         float count = levelHolder[currentLevel].level.Count;
         rows = (int)Mathf.Sqrt(count);
         cols = rows;

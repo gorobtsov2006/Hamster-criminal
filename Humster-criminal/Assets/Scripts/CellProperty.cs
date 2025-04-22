@@ -186,7 +186,9 @@ public class CellProperty : MonoBehaviour
 
             // Проверяем, нажата ли клавиша движения
             bool isMoving = Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.LeftArrow) ||
-                            Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.DownArrow);
+                            Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.DownArrow) ||
+                            Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) ||
+                            Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D);
 
             if (isMoving && Time.time - lastMoveTime >= moveDelay)
             {
@@ -196,10 +198,10 @@ public class CellProperty : MonoBehaviour
                 }
 
                 Vector2 direction = Vector2.zero;
-                if (Input.GetKey(KeyCode.RightArrow)) direction = Vector2.right;
-                else if (Input.GetKey(KeyCode.LeftArrow)) direction = Vector2.left;
-                else if (Input.GetKey(KeyCode.UpArrow)) direction = Vector2.up;
-                else if (Input.GetKey(KeyCode.DownArrow)) direction = Vector2.down;
+                if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) direction = Vector2.right;
+                else if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) direction = Vector2.left;
+                else if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)) direction = Vector2.up;
+                else if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) direction = Vector2.down;
 
                 if (CanMove(direction))
                 {

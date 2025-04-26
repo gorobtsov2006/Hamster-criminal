@@ -100,7 +100,13 @@ public class GridMaker : MonoBehaviour
             counter++;
         }
 
-        //нужно добавить цикл-------------------------------------
+        foreach (GameObject cell in cells)
+        {
+            if (cell != null)
+            {
+                cell.GetComponent<CellProperty>().Initialize();
+            }
+        }
     }
 
     public Sprite ReturnSpriteOf(ElementTypes e, Vector2 direction)

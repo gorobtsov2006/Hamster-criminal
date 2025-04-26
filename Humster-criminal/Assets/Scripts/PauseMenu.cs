@@ -55,6 +55,8 @@ public class PauseMenu : MonoBehaviour
     //Перезапуск
     public void Restart()
     {
+        //------------
+        //------------
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 

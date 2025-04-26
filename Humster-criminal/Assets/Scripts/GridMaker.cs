@@ -84,6 +84,9 @@ public class GridMaker : MonoBehaviour
             }
         }
 
+        cells.Clear();  
+
+
         int counter = 0;
         for (int i = 0; i < levelHolder[currentLevel].level.Count; i++)
         {
@@ -96,6 +99,8 @@ public class GridMaker : MonoBehaviour
             }
             counter++;
         }
+
+        //нужно добавить цикл-------------------------------------
     }
 
     public Sprite ReturnSpriteOf(ElementTypes e, Vector2 direction)
@@ -108,7 +113,7 @@ public class GridMaker : MonoBehaviour
             if (direction == Vector2.up) return lib.hamsterSprites.upSprite;
             if (direction == Vector2.down) return lib.hamsterSprites.downSprite;
         }
-        return lib.sprite; // Обычный спрайт для других объектов
+        return lib.sprite; 
     }
 
     public Vector2 Return2D(int i)

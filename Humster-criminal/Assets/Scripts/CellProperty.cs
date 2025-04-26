@@ -123,7 +123,12 @@ public class CellProperty : MonoBehaviour
 
     private void ResetState()
     {
-        //нужно дописать ------------------------------
+        moveHistory.Clear();
+        lastMoveTime = 0f;
+        isMovingLastFrame = false;
+        isUndoing = false;
+        lastDirection = Vector2.right;
+        ClearDangerIndicators();
     }
 
 

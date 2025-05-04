@@ -55,6 +55,8 @@ public class PauseMenu : MonoBehaviour
     //Перезапуск
     public void Restart()
     {
+        Time.timeScale = 1f;
+        PauseGame = false;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 

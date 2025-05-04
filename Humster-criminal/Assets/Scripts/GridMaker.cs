@@ -84,6 +84,9 @@ public class GridMaker : MonoBehaviour
             }
         }
 
+        cells.Clear();  
+
+
         int counter = 0;
         for (int i = 0; i < levelHolder[currentLevel].level.Count; i++)
         {
@@ -95,6 +98,14 @@ public class GridMaker : MonoBehaviour
                 g.GetComponent<CellProperty>().AssignInfo(counter / rows, counter % cols, currentElement);
             }
             counter++;
+        }
+
+        foreach (GameObject cell in cells)
+        {
+            if (cell != null)
+            {
+                cell.GetComponent<CellProperty>().Initialize();
+            }
         }
     }
 
@@ -108,7 +119,7 @@ public class GridMaker : MonoBehaviour
             if (direction == Vector2.up) return lib.hamsterSprites.upSprite;
             if (direction == Vector2.down) return lib.hamsterSprites.downSprite;
         }
-        return lib.sprite; // Обычный спрайт для других объектов
+        return lib.sprite; 
     }
 
     public Vector2 Return2D(int i)

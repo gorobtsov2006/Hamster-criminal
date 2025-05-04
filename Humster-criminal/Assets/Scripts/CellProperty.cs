@@ -12,28 +12,27 @@ public class CellProperty : MonoBehaviour
     bool isPlayer;
     bool isStop;
     bool isDangerous;
-    bool isKill; // Новое свойство для убийства
+    bool isKill; 
     int currentRow, currentCol;
     Vector2 lastDirection = Vector2.right;
 
-    // Для движения при зажатии клавиши
-    private float moveDelay = 0.2f; // Задержка между шагами (в секундах)
-    private float lastMoveTime; // Время последнего шага
-    private bool isMovingLastFrame = false; // Флаг: двигался ли игрок в прошлом кадре
+    
+    private float moveDelay = 0.2f; 
+    private float lastMoveTime; 
+    private bool isMovingLastFrame = false; 
 
-    // Для отмены действия
+    
     private struct MoveState
     {
-        public List<(GameObject obj, int row, int col)> positions; // Позиции всех объектов перед движением
-        public Vector2 direction; // Направление хомяка перед движением
+        public List<(GameObject obj, int row, int col)> positions; 
+        public Vector2 direction; 
     }
-    private Stack<MoveState> moveHistory = new Stack<MoveState>(); // История движений
-    private bool isUndoing = false; // Флаг для блокировки движения во время отмены
+    private Stack<MoveState> moveHistory = new Stack<MoveState>(); 
+    private bool isUndoing = false;
 
-    // Визуализация зон поражения
-    private List<GameObject> dangerIndicators = new List<GameObject>(); // Список индикаторов
-    public GameObject dangerZonePrefab; // Префаб индикатора (назначьте в Inspector)
-
+    
+    private List<GameObject> dangerIndicators = new List<GameObject>(); 
+    public GameObject dangerZonePrefab; 
     public ElementTypes Element
     {
         get { return element; }
@@ -53,10 +52,13 @@ public class CellProperty : MonoBehaviour
     public int CurrentRow
     {
         get { return currentRow; }
+        set { currentRow = value; }
     }
+
     public int CurrentCol
     {
         get { return currentCol; }
+        set { currentCol = value; }
     }
 
     SpriteRenderer spriteRenderer;
@@ -68,7 +70,10 @@ public class CellProperty : MonoBehaviour
         {
             Debug.LogError("DangerZonePrefab не назначен в CellProperty!");
         }
+        ResetState();
     }
+
+
 
     public void AssignInfo(int r, int c, ElementTypes e)
     {
@@ -88,7 +93,7 @@ public class CellProperty : MonoBehaviour
         if (e == ElementTypes.Rat)
         {
             isDangerous = true;
-            isKill = false; // Крыса не убивает по умолчанию
+            isKill = false; 
         }
     }
 
@@ -100,7 +105,7 @@ public class CellProperty : MonoBehaviour
         isPlayer = false;
         isStop = false;
         isDangerous = false;
-        isKill = false; // Инициализируем как false
+        isKill = false; 
 
         if ((int)element >= 99)
         {
@@ -110,8 +115,22 @@ public class CellProperty : MonoBehaviour
         {
             isDangerous = true;
         }
-        ClearDangerIndicators(); // Очищаем индикаторы при инициализации
+        ClearDangerIndicators(); 
     }
+
+
+
+
+    private void ResetState()
+    {
+        moveHistory.Clear();
+        lastMoveTime = 0f;
+        isMovingLastFrame = false;
+        isUndoing = false;
+        lastDirection = Vector2.right;
+        ClearDangerIndicators();
+    }
+
 
     public void ChangeSprite()
     {
@@ -139,9 +158,9 @@ public class CellProperty : MonoBehaviour
         isPlayer = c.isPlayer;
         isStop = c.IsStop;
         isDangerous = c.isDangerous;
-        isKill = c.isKill; // Переносим свойство isKill
+        isKill = c.isKill;
         ChangeSprite();
-        UpdateDangerIndicators(); // Обновляем индикаторы
+        UpdateDangerIndicators(); 
     }
 
     public void IsPlayer(bool isP)
@@ -184,9 +203,11 @@ public class CellProperty : MonoBehaviour
         {
             CheckDanger();
 
-            // Проверяем, нажата ли клавиша движения
+            
             bool isMoving = Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.LeftArrow) ||
-                            Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.DownArrow);
+                            Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.DownArrow) ||
+                            Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) ||
+                            Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D);
 
             if (isMoving && Time.time - lastMoveTime >= moveDelay)
             {
@@ -196,10 +217,10 @@ public class CellProperty : MonoBehaviour
                 }
 
                 Vector2 direction = Vector2.zero;
-                if (Input.GetKey(KeyCode.RightArrow)) direction = Vector2.right;
-                else if (Input.GetKey(KeyCode.LeftArrow)) direction = Vector2.left;
-                else if (Input.GetKey(KeyCode.UpArrow)) direction = Vector2.up;
-                else if (Input.GetKey(KeyCode.DownArrow)) direction = Vector2.down;
+                if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) direction = Vector2.right;
+                else if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) direction = Vector2.left;
+                else if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)) direction = Vector2.up;
+                else if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) direction = Vector2.down;
 
                 if (CanMove(direction))
                 {
